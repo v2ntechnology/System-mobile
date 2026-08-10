@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "@rookhub/tokens/theme.css";
+@import "@rookhub/tokens/glass.css";
+
+/* Tailwind v4 só varre o diretório do app por padrão. Os primitivos de vidro
+   vivem em packages/ui e precisam ser declarados explicitamente. */
+@source "../../../../packages/ui/src";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-md);
+    line-height: var(--text-body-md--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  /* RNF-027 — números alinhados em tabelas e métricas. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+    color: var(--color-on-surface);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}

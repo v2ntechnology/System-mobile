@@ -1,0 +1,14 @@
+{
+  "name": "@rookhub/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./theme.css": "./src/theme.css",
+    "./glass.css": "./src/glass.css",
+    "./tokens": "./src/tokens.ts"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.0.0"
+  }
+}

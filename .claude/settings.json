@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"style.json: %{http_code}\\\\n\" https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json --max-time 10)",
+      "Bash(curl -s -o /dev/null -w \"tile:       %{http_code}\\\\n\" https://a.basemaps.cartocdn.com/rastertiles/dark_all/9/196/280.png --max-time 10)",
+      "Bash(curl -s https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json --max-time 10)",
+      "Bash(node netfail.mjs)",
+      "Bash(nohup google-chrome --headless=new --enable-unsafe-swiftshader --hide-scrollbars --remote-debugging-port=9222 --user-data-dir=/tmp/rookhub-audit/chrome-profile about:blank)",
+      "Bash(node mapshot.mjs)",
+      "Bash(node mapstate.mjs)",
+      "Bash(node shot.mjs http://localhost:4173/app/custos custos.png 1440 900)",
+      "Bash(node contrast.mjs http://localhost:4173/app/notificacoes)",
+      "Bash(node contrast.mjs http://localhost:4173/app/caminhoes)",
+      "Bash(node overflow.mjs http://localhost:4173/app/caminhoes 360)",
+      "Bash(python3 -c ' *)",
+      "Bash(node shot.mjs http://localhost:4173/app/caminhoes cam-truck2.png 1440 620)",
+      "Bash(pnpm --filter @rookhub/web typecheck)",
+      "Bash(npm ls *)",
+      "Bash(python3 -c \"import playwright; print\\('py playwright'\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(google-chrome --headless=new --remote-debugging-port=9222 --no-sandbox --disable-gpu --hide-scrollbars --user-data-dir=/tmp/claude-1000/-home-vinicim-Documentos-projetos-rookhubFrontend/7340a4b1-eee6-468d-9311-f6b3359d0ada/scratchpad/chrome-profile about:blank)",
+      "Bash(curl -s http://localhost:9222/json/version)",
+      "Bash(ROUTES=\"/app|owner-home,/app/resultado|owner-result,/app/desempenho|owner-performance,/app/aprovacoes|owner-approvals\" node drive.mjs)",
+      "Bash(ROUTES=\"/app|owner-home,/app/resultado|owner-result\" node drive.mjs)",
+      "Bash(ROUTES=\"/app/resultado|owner-result,/app/desempenho|owner-performance,/app/aprovacoes|owner-approvals\" node drive.mjs)",
+      "Bash(node decide.mjs)",
+      "Bash(node checks.mjs)",
+      "Bash(node probe.mjs)",
+      "Bash(node finaltabs.mjs)",
+      "Bash(pnpm format *)",
+      "Bash(ROUTES=\"/app|final-home,/app/resultado|final-result,/app/desempenho|final-perf,/app/aprovacoes|final-aprov\" node drive.mjs)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(sed -i 's|localhost:5174|localhost:5173|' reload.mjs drive.mjs)",
+      "Bash(node reload.mjs)",
+      "Bash(pkill -f \"remote-debugging-port=9222\")",
+      "Bash(curl -s -o /dev/null -w \"5173: %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(google-chrome --headless=new --remote-debugging-port=9222 --no-sandbox --disable-gpu --hide-scrollbars --user-data-dir=./chrome-profile about:blank)",
+      "Bash(node inspect.mjs)",
+      "Bash(node navshot.mjs)"
+    ]
+  }
+}

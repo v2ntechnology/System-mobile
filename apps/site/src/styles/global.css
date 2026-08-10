@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "@rookhub/tokens/theme.css";
+@import "@rookhub/tokens/glass.css";
+
+/* A detecção automática do Tailwind v4 parte do diretório do CSS. Declarar o
+   `src` inteiro é explícito e não depende da heurística do monorepo. */
+@source "../";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* A topbar é fixa: sem isto o alvo de uma âncora nasce escondido atrás dela. */
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-body-md);
+    line-height: var(--text-body-md--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  /* RNF-027 — números alinhados em tabelas e métricas. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+    color: var(--color-on-surface);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /**
+   * Entrada suave das seções ao rolar.
+   *
+   * `animation-timeline: view()` é progressivo: onde não houver suporte, o
+   * elemento simplesmente já nasce no estado final (a animação nunca roda) —
+   * por isso o estado base é o visível, e não o transparente.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        animation: reveal-in linear both;
+        animation-timeline: view();
+        animation-range: entry 8% cover 26%;
+      }
+    }
+  }
+
+  @keyframes reveal-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

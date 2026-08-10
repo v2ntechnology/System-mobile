@@ -1,0 +1,204 @@
+/**
+ * RookHub — Design Tokens
+ *
+ * Fonte de verdade: DESIGN.md (prosa) + FE-01, FE-02, FE-12 do documento de arquitetura,
+ * com as decisões visuais tomadas a partir do Figma.
+ *
+ * ÂNCORAS IMUTÁVEIS
+ *   #212121  Graphite  — fundo de TODA a aplicação (decisão de produto, substitui #0B1220)
+ *   #6366F1  Indigo    — marca primária
+ *   #06B6D4  Cyan      — marca secundária
+ *
+ * A rampa neutra é derivada de #212121 e é DELIBERADAMENTE acromática: o matiz azulado
+ * da versão anterior (H ≈ 250°) foi abandonado junto com o fundo Midnight, porque cinza
+ * azulado sobre cinza neutro suja a leitura das superfícies de vidro.
+ *
+ * Todos os pares texto/fundo abaixo foram verificados contra #212121.
+ */
+
+@theme {
+  /* ----------------------------------------------------------------------
+   * Superfícies — rampa neutra ancorada em #212121
+   * -------------------------------------------------------------------- */
+  --color-background: #212121; /* âncora — fundo da aplicação inteira */
+  --color-surface: #212121;
+  --color-surface-lowest: #171717; /* poços: campos de entrada, áreas recuadas */
+  --color-surface-low: #262626; /* vidro sobre o fundo */
+  --color-surface-container: #2e2e2e; /* card padrão (base do glass 0.04) */
+  --color-surface-high: #383838; /* card elevado */
+  --color-surface-highest: #434343; /* modais (base do glass 0.08) */
+
+  /* ----------------------------------------------------------------------
+   * Texto e traço — contraste medido sobre #212121
+   * -------------------------------------------------------------------- */
+  --color-on-surface: #f0f0f2; /* 14.1:1 — AAA */
+  --color-on-surface-variant: #b4b4bc; /*  7.8:1 — AAA */
+  /**
+   * Texto terciário. Calibrado com margem para a superfície MAIS CLARA da rampa
+   * (#2E2E2E, o card), não só para o fundo: o valor anterior (#8A8A94) passava
+   * raspando em #212121 e reprovava assim que subia um degrau de elevação.
+   *   #212121 → 5.8:1 · #262626 → 5.5:1 · #2E2E2E → 4.9:1
+   */
+  --color-on-surface-muted: #9a9aa4;
+  --color-outline: #6e6e76; /*  3.2:1 — traço de componente */
+  --color-outline-variant: #3a3a3e; /* divisórias sutis */
+
+  /* ----------------------------------------------------------------------
+   * Marca
+   * -------------------------------------------------------------------- */
+  --color-primary: #6366f1; /* âncora — Indigo. Preenchimento, borda, ícone. */
+  /**
+   * Indigo para superfície que carrega TEXTO branco em tamanho normal.
+   * O âncora #6366F1 dá apenas 4.47:1 com branco — reprova AA por uma casa
+   * decimal. Medido no navegador, não estimado. Use este em botão e chip.
+   */
+  --color-primary-strong: #5457ee; /* 5.3:1 com branco — AA */
+  --color-primary-container: #3730a3;
+  --color-on-primary: #ffffff;
+  --color-secondary: #06b6d4; /* âncora — Cyan · 6.6:1 como texto — AAA */
+  --color-secondary-container: #0e7490;
+  --color-on-secondary: #00212b;
+  --color-tertiary: #212121; /* Graphite estrutural (âncora) */
+
+  /* ----------------------------------------------------------------------
+   * Semânticos — faixa clara de cada matiz.
+   * Um vermelho escuro (#DC2626) reprova WCAG AA sobre superfície translúcida.
+   * -------------------------------------------------------------------- */
+  --color-success: #34d399; /*  9.0:1 */
+  --color-warning: #fbbf24; /*  9.6:1 */
+  --color-error: #fb7185; /*  6.0:1 */
+  --color-info: #38bdf8; /*  8.0:1 */
+
+  /* ----------------------------------------------------------------------
+   * Raio de cantos — FE-02
+   * Containers (card, painel, modal) = 16px  → rounded-lg
+   * Elementos internos (botão, input, chip) = 12px → rounded-md
+   * Telas de autenticação (Figma) = pill
+   * -------------------------------------------------------------------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* ----------------------------------------------------------------------
+   * Superfície clara — botão primário das telas de autenticação (Figma).
+   * #171717 sobre #F8FAFC = 16.8:1 (AAA).
+   * -------------------------------------------------------------------- */
+  --color-bright: #f8fafc;
+  --color-on-bright: #171717;
+
+  /* ----------------------------------------------------------------------
+   * SUPERFÍCIE CLARA — painéis do dashboard (Figma).
+   *
+   * O painel inverte a lógica do login: cards claros sobre o grafite. Estes
+   * tokens existem para que essa inversão seja explícita e auditável, em vez
+   * de virar `bg-white/90` espalhado pelos componentes.
+   *
+   * Contrastes medidos sobre #E8EAEC.
+   * -------------------------------------------------------------------- */
+  --color-light: #e8eaec; /* painel claro */
+  --color-light-container: #f4f5f6; /* bloco interno claro */
+  --color-on-light: #16161a; /* 15.2:1 — AAA */
+  --color-on-light-variant: #4a4a54; /*  7.3:1 — AAA */
+  --color-on-light-muted: #62626c; /*  5.0:1 — AA  */
+  --color-light-outline: #c7c9ce; /* divisórias sobre claro */
+  /**
+   * Indigo legível sobre claro. O `primary` (#6366F1) dá apenas 3.7:1 no claro:
+   * serve para título ≥24px bold (AA Large), NUNCA para texto corrido.
+   */
+  /**
+   * Semânticos e marca sobre superfície clara.
+   *
+   * Os semânticos da marca são claros por construção — existem para funcionar
+   * sobre o grafite — e ficam ilegíveis aqui: `error` #FB7185 sobre o painel
+   * claro dá 2.0:1.
+   *
+   * Estes tons foram escolhidos para passar AA no caso MAIS APERTADO, que é o
+   * texto dentro de um `StatusChip`: ali o fundo já vem tingido a 12% da própria
+   * cor, ficando mais escuro que o painel e comendo contraste. Se passam no chip,
+   * passam como texto corrido sobre o painel limpo.
+   */
+  --color-primary-on-light: #4338ca;
+  --color-error-on-light: #9f1239;
+  --color-warning-on-light: #6b3f0a;
+  --color-success-on-light: #065f46;
+
+  /* ----------------------------------------------------------------------
+   * Paleta categórica de gráficos sobre superfície clara.
+   * Validada: deutan ΔE 15.5 · tritan 11.6 · visão normal 22.0 · contraste ≥3:1.
+   * A ordem é FIXA — série nunca troca de cor quando um filtro muda a contagem.
+   * -------------------------------------------------------------------- */
+  --color-chart-1: #4f46e5;
+  --color-chart-2: #0e8fa8;
+  --color-chart-3: #e11d48;
+
+  /* ----------------------------------------------------------------------
+   * Tipografia — Sora (display/headline) + Inter (body/label)
+   * -------------------------------------------------------------------- */
+  --font-display: "Sora Variable", "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--font-weight: 700;
+  --text-display-lg--letter-spacing: -0.02em;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 20px;
+  --text-label-md--font-weight: 500;
+  --text-label-md--letter-spacing: 0.05em;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--font-weight: 500;
+  --text-label-sm--letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+ * Variáveis fora do @theme — usadas em background-image / filter,
+ * onde Tailwind não gera utilitário automaticamente.
+ * ----------------------------------------------------------------------- */
+:root {
+  /* Spectrum Gradient — variação magenta (aprovada). Uso PARCIMONIOSO. */
+  --spectrum-gradient: linear-gradient(
+    135deg,
+    #e879f9 0%,
+    /* Magenta          */ #a855f7 17%,
+    /* Púrpura          */ #6366f1 33%,
+    /* Indigo   — âncora */ #4f7df3 50%,
+    /* Azul             */ #3b9ef5 67%,
+    /* Sky              */ #06b6d4 83%,
+    /* Cyan     — âncora */ #22d3ee 100% /* Cyan claro       */
+  );
+
+  --glow-indigo: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  --glow-cyan: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+
+  /* Profundidade do fundo — tom mais escuro que a âncora, para vinheta e topo. */
+  --backdrop-deep: #141414;
+
+  /* Camadas de vidro — opacidade travada para contraste determinístico (FE-07) */
+  --glass-surface: rgba(255, 255, 255, 0.05);
+  --glass-surface-elevated: rgba(255, 255, 255, 0.09);
+  --glass-blur: 16px;
+  --glass-blur-elevated: 24px;
+  --glass-border-from: rgba(255, 255, 255, 0.16);
+  --glass-border-to: rgba(255, 255, 255, 0.05);
+
+  color-scheme: dark;
+}
