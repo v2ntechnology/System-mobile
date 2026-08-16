@@ -31,6 +31,10 @@ expo-env.d.ts
 .claude/settings.json
 .claude/settings.local.json
 
+# Instruções locais de ambiente: valem para uma máquina, não para o time.
+.claude/CLAUDE.local.md
+CLAUDE.local.md
+
 # Demais agentes de IA — nada deles é versionado.
 .agents/
 .codex/
