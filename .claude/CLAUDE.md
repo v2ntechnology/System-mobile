@@ -62,9 +62,17 @@
 
 - Repositório: `https://github.com/v2ntechnology/System-mobile.git`, branch principal `main`.
 - Alterar identidade Git apenas com `git config --local`; nunca alterar a configuração global.
-- Mensagem de commit em pt-BR, sem `Co-Authored-By` e **sem prefixo de Conventional Commits**
-  (decisão do usuário em 15/08/2026): nada de `feat:`, `fix(escopo):` e afins. O assunto explica em
-  uma frase o que a mudança faz, e o corpo explica brevemente o porquê.
+- **Nunca commitar direto em `main`.** Todo desenvolvimento, correção ou refatoração acontece em
+  branch dedicada, criada a partir da base atualizada: `feature/<nome-da-funcionalidade>` ou
+  `fix/<descricao-do-bug>`. O isolamento mantém a branch principal sempre em estado revertível.
+- Merge em `main` somente após a suíte de testes completa passar e a estabilidade ser confirmada.
+- Mensagem de commit no padrão **Conventional Commits**, com o **prefixo e o escopo em inglês** e o
+  **assunto em pt-BR** (decisão do usuário em 16/08/2026, que substitui a decisão de 15/08/2026):
+  `feat(checklist): valida o formulário digital`, `fix(auth): corrige expiração do token de sessão`.
+  O assunto explica em uma frase o que a mudança faz, e o corpo explica brevemente o porquê.
+- **Nenhum nome de IA em qualquer metadado do Git**: nem em commit, tag, `Co-authored-by:` ou
+  mensagem de log. A autoria é exclusivamente do desenvolvedor humano, pela identidade configurada
+  no repositório.
 - Cada pessoa configura a **própria identidade** no repositório, e a credencial de push da conta que
   tem acesso a ele, sempre com `git config --local`:
   `git config --local user.name "Seu Nome"` e `git config --local user.email "seu.email@exemplo.com"`.
