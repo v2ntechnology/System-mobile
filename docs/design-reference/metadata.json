@@ -1,0 +1,6 @@
+{
+  "name": "RotaCaminhoneiro UI",
+  "description": "Design UI/UX moderno e ergonômico para aplicativo mobile de motoristas de caminhão com cockpit de bordo, controle de jornada, paradas seguras e checklist.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

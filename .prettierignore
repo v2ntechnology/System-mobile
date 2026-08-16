@@ -1,0 +1,10 @@
+# Dependências e saídas de build
+node_modules/
+dist/
+.expo/
+
+# Material de referência de design: protótipo web de terceiros, lido e não mantido aqui
+docs/design-reference/
+
+# Skills instaladas no repositório — documentação de ferramenta, não código do app
+.claude/skills/

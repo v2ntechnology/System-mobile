@@ -1,0 +1,409 @@
+/**
+ * Contratos de domínio do app do motorista.
+ *
+ * Escritos à mão APENAS enquanto não existe backend. Quando o servidor expuser o
+ * OpenAPI 3.1 (BE-04), o cliente e os tipos passam a ser gerados e este arquivo
+ * fica restrito ao que for puramente de frontend.
+ *
+ * ⚠️ Este é um **recorte** do domínio, não o domínio inteiro: o painel de gestão
+ * (projeto `System-web`) tem a sua própria cópia, com as ~130 estruturas de
+ * frota, custos, manutenção e segurança que o motorista nunca vê. Os dois lados
+ * falam com o mesmo servidor, então o que existir nos dois — `Session`, `Trip`,
+ * `Driver`, `FuelingRecord` — precisa ter **a mesma forma**. Mudança de campo
+ * aqui é mudança de contrato: espelhar lá, na mão.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Identidade e sessão                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Papéis de usuário (RF-003).
+ *
+ * `DRIVER` é o único que entra neste app; os demais entram no painel. Todos
+ * moram no mesmo union porque a autorização é do backend e o token é o mesmo —
+ * separar o tipo daria a impressão de dois sistemas de identidade, que não é o
+ * caso.
+ */
+export type Role = "OWNER" | "MANAGER" | "OPERATOR" | "MAINTENANCE" | "SUPER_ADMIN" | "DRIVER";
+
+/** Módulos contratáveis por plano (RF-002 / tenant_modules). */
+export type Module =
+  "FLEET" | "TRIPS" | "CHECKLIST" | "COSTS" | "MAINTENANCE" | "SAFETY" | "ASSISTANT";
+
+export interface Tenant {
+  id: string;
+  name: string;
+  /** Módulos efetivamente contratados — base do gate de entitlement (RF-002). */
+  modules: Module[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  tenantId: string;
+  avatarUrl?: string;
+  /** RF-007 — controla se OPERATOR enxerga valores financeiros. */
+  operatorSeesFinancials: boolean;
+  mfaEnabled: boolean;
+  /** Só em contas DRIVER: cadastro correspondente em `drivers`. */
+  driverId?: string;
+}
+
+export interface Session {
+  user: User;
+  tenant: Tenant;
+  /** JWT de acesso — 15 min (BE-11). Mockado nesta fase. */
+  accessToken: string;
+  expiresAt: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Viagens (RF-011)                                                            */
+/* -------------------------------------------------------------------------- */
+
+/** Máquina de estados da viagem (RF-011). A ordem aqui é a ordem do fluxo. */
+export type TripStatus =
+  "PLANEJADA" | "EM_CARREGAMENTO" | "EM_TRANSITO" | "EM_DESCARGA" | "CONCLUIDA" | "CANCELADA";
+
+export interface TripEvent {
+  status: TripStatus;
+  at: string;
+  note?: string;
+}
+
+export interface Trip {
+  id: string;
+  code: string;
+  status: TripStatus;
+  origin: string;
+  destination: string;
+  distanceKm: number;
+  driverName: string;
+  plate: string;
+  cargo: string;
+  startedAt: string;
+  /** Prazo acordado com o cliente, ISO 8601. */
+  dueAt: string;
+  /** Conclusão real; ausente enquanto a viagem não terminou. */
+  finishedAt?: string;
+  /** Progresso 0–100 da distância percorrida. */
+  progressPercent: number;
+  timeline: TripEvent[];
+}
+
+/** Ponto geográfico usado apenas no recorte de rota do aplicativo. */
+export interface RoutePoint {
+  latitude: number;
+  longitude: number;
+}
+
+/**
+ * Fotografia da rota em andamento retornada junto da home do motorista.
+ *
+ * O mapa administrativo acompanha toda a frota; aqui chega somente o trecho do
+ * motorista autenticado para reduzir consumo de rede e manter o foco da tela.
+ */
+export interface DriverRouteSnapshot {
+  origin: RoutePoint;
+  destination: RoutePoint;
+  currentPosition: RoutePoint;
+  path: RoutePoint[];
+  speedKph: number;
+  etaMinutes: number;
+  updatedAt: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Motorista                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export type DriverStatus = "EM_VIAGEM" | "DISPONIVEL" | "DESCANSO" | "AFASTADO";
+
+export interface Driver {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  status: DriverStatus;
+  /** Score de segurança 0–100 (RF-031). */
+  score: number;
+  /** Variação do score contra o período anterior, em pontos. */
+  scoreDelta: number;
+  tripsCount: number;
+  kmDriven: number;
+  criticalEvents: number;
+  cnhCategory: string;
+  /** Vencimento da CNH, ISO 8601. */
+  cnhExpiresAt: string;
+  currentVehiclePlate?: string;
+}
+
+/** Faixa de premiação configurada pela empresa para o período. */
+export interface DriverRewardTier {
+  minScore: number;
+  amount: number;
+}
+
+/**
+ * Prévia da premiação variável do motorista.
+ *
+ * As faixas vêm do backend da empresa; o app apenas explica o valor corrente e
+ * qual é o próximo objetivo. Isso evita esconder uma regra financeira na UI.
+ */
+export interface DriverReward {
+  programName: string;
+  periodLabel: string;
+  estimatedAmount: number;
+  maxAmount: number;
+  closesAt: string;
+  position: number;
+  participantCount: number;
+  tiers: DriverRewardTier[];
+}
+
+/** Parcela parametrizada que compõe o score de segurança. */
+export interface DriverScoreFactor {
+  id: string;
+  label: string;
+  description: string;
+  score: number;
+  weightPercent: number;
+}
+
+export type WarningSeverity = "LEVE" | "MEDIA" | "GRAVE";
+
+/**
+ * Mídia de um evento de segurança.
+ *
+ * RN-092 — o RookHub **não armazena vídeo**. Guarda metadados e uma URL assinada
+ * que aponta para o fornecedor (Hik-Connect), com expiração máxima de 15 minutos
+ * (RNF-022). Por isso a URL é pedida sob demanda, e não vem na listagem.
+ */
+export interface EventMedia {
+  provider: string;
+  durationSeconds: number;
+  /** Instante do clipe, ISO 8601. */
+  recordedAt: string;
+  /** Preenchida só quando o usuário pede para assistir. */
+  signedUrl?: string;
+  expiresAt?: string;
+}
+
+export interface DriverWarning {
+  id: string;
+  title: string;
+  description: string;
+  severity: WarningSeverity;
+  /** Data da advertência, ISO 8601. */
+  at: string;
+  /** Quem aplicou. */
+  issuedBy: string;
+  /** Trecho onde ocorreu, quando houver. */
+  location?: string;
+  vehiclePlate?: string;
+  /** Motorista contestou a advertência (RF-029). */
+  contested?: boolean;
+  media?: EventMedia;
+}
+
+export type RoadEventType =
+  | "EXCESSO_VELOCIDADE"
+  | "FRENAGEM_BRUSCA"
+  | "CURVA_AGRESSIVA"
+  | "JORNADA_EXCEDIDA"
+  | "DISTRACAO"
+  | "SONOLENCIA";
+
+export interface RoadEventCount {
+  type: RoadEventType;
+  label: string;
+  count: number;
+  /** Variação contra o período anterior, em ocorrências. */
+  delta: number;
+  /** Efeito consolidado do evento no score atual, já calculado pela empresa. */
+  scoreImpact: number;
+  /** Orientação curta e acionável para recuperar pontos. */
+  guidance: string;
+}
+
+/** Ficha completa do motorista — a tela de perfil do app. */
+export interface DriverProfile {
+  driverId: string;
+
+  /* Pessoais */
+  birthDate: string;
+  cpfMasked: string;
+  phone: string;
+  city: string;
+  state: string;
+
+  /* Habilitação */
+  cnhNumber: string;
+  cnhCategory: string;
+  cnhExpiresAt: string;
+  /** Exerce Atividade Remunerada — obrigatório para motorista profissional. */
+  cnhEar: boolean;
+  /** Pontos na CNH (0–40 antes da suspensão). */
+  cnhPoints: number;
+
+  /* Contrato */
+  hiredAt: string;
+  role: string;
+  /** Salário base mensal. Só chega ao cliente se o papel puder ver (RF-007). */
+  monthlySalary?: number;
+  contractType: string;
+
+  /* Operação no período */
+  avgFuelEfficiency: number;
+  onTimeDeliveryRate: number;
+  hoursDriven: number;
+
+  /** Evolução do score de segurança. */
+  scoreHistory: { month: string; score: number }[];
+  scoreFactors: DriverScoreFactor[];
+  reward: DriverReward;
+  roadEvents: RoadEventCount[];
+  warnings: DriverWarning[];
+}
+
+/* -------------------------------------------------------------------------- */
+/* Abastecimento (RF-022)                                                      */
+/* -------------------------------------------------------------------------- */
+
+/** Abastecimento individual, com a marcação de anomalia (RF-022). */
+export interface FuelingRecord {
+  id: string;
+  at: string;
+  plate: string;
+  driverName: string;
+  station: string;
+  liters: number;
+  pricePerLiter: number;
+  total: number;
+  /** km/l apurado desde o abastecimento anterior. */
+  efficiency: number;
+  /**
+   * Fora do padrão histórico do veículo. O motivo acompanha porque "anomalia"
+   * sem explicação não ajuda ninguém a decidir.
+   */
+  anomaly?: string;
+}
+
+export interface DriverFuelEntryInput {
+  plate: string;
+  tripId?: string;
+  station: string;
+  liters: number;
+  pricePerLiter: number;
+  /** Odômetro no momento do abastecimento — sem ele não há km/l. */
+  odometerKm: number;
+  at: string;
+  receiptPhotoUri?: string;
+}
+
+/** Confirmação do abastecimento, já com o km/l apurado pelo servidor. */
+export interface DriverFuelEntryReceipt {
+  id: string;
+  total: number;
+  efficiency: number;
+  /** Fora do padrão do veículo — texto explicativo, não só um sinalizador. */
+  anomaly?: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Checklist pré-viagem (RF-012 a RF-017)                                      */
+/* -------------------------------------------------------------------------- */
+
+export type ChecklistResult = "APROVADO" | "REPROVADO";
+
+export interface DriverChecklistItem {
+  id: string;
+  label: string;
+  hint?: string;
+  /** Reprovar este item bloqueia a saída do veículo (RF-016). */
+  blocking: boolean;
+  /** Reprovação exige foto anexada (RN-040). */
+  requiresPhotoOnFail: boolean;
+}
+
+export interface DriverChecklistSection {
+  title: string;
+  items: DriverChecklistItem[];
+}
+
+export interface DriverChecklistTemplate {
+  id: string;
+  name: string;
+  /** Gravada em cada preenchimento (RN-033) — o template muda, o histórico não. */
+  version: string;
+  sections: DriverChecklistSection[];
+}
+
+export interface DriverChecklistAnswer {
+  itemId: string;
+  result: ChecklistResult;
+  note?: string;
+  /** URI local da foto no aparelho; o upload é do app, não deste contrato. */
+  photoUri?: string;
+}
+
+export interface DriverChecklistSubmission {
+  templateId: string;
+  templateVersion: string;
+  plate: string;
+  tripId?: string;
+  /** Relógio do aparelho (RN-054) — o servidor carimba o dele na chegada. */
+  filledAt: string;
+  answers: DriverChecklistAnswer[];
+}
+
+export interface DriverChecklistReceipt {
+  id: string;
+  result: ChecklistResult;
+  blocking: boolean;
+  receivedAt: string;
+  /** Mensagem pronta para a tela: o que acontece agora com o veículo. */
+  message: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tela inicial e erros                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * O que o motorista vê ao abrir o app.
+ *
+ * É uma composição de `Trip` e `Driver` recortada pela ótica de quem dirige: uma
+ * viagem corrente, o que vem depois e as pendências que travam a saída. No
+ * backend isto é um único `GET /v1/driver/home` — o app de campo roda em rede
+ * ruim, e três chamadas na abertura custam caro.
+ */
+export interface DriverHome {
+  driver: Driver;
+  /** Viagem em andamento; ausente quando o motorista está livre. */
+  currentTrip?: Trip;
+  nextTrips: Trip[];
+  /** RF-016 — checklist do dia ainda não enviado para o veículo atual. */
+  checklistPending: boolean;
+  /** Bloqueio ativo por checklist reprovado (RN-040): veículo não pode sair. */
+  blockedByChecklist: boolean;
+  /** Odômetro do último abastecimento — base do km/l do próximo. */
+  lastOdometerKm: number;
+  cnhExpiresAt: string;
+  /** Rota em andamento; ausente quando não há viagem ativa. */
+  route?: DriverRouteSnapshot;
+  /** Estimativa parametrizada pela empresa para o período corrente. */
+  reward: DriverReward;
+}
+
+/** Erro no padrão RFC 9457 (Problem Details) — convenção do backend (BE-04). */
+export interface ProblemDetails {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+  instance?: string;
+  errors?: Record<string, string[]>;
+}

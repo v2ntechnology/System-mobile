@@ -1,23 +1,54 @@
+# Dependências
 node_modules/
+
+# Expo
+.expo/
 dist/
-build/
-.next/
-next-env.d.ts
-.turbo/
-*.tsbuildinfo
+web-build/
+expo-env.d.ts
+.metro-health-check*
 
+# Pastas nativas geradas pelo prebuild — o projeto é managed workflow
+/ios
+/android
+.kotlin/
+
+# Assinatura e credenciais nativas
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Ambiente
 .env
-.env.local
-.env.*.local
-!.env.example
+.env.*
 
-.DS_Store
-Thumbs.db
+# CLAUDE.md, memoria.md e skills são versionados: valem para o time inteiro.
+# Só as permissões ficam de fora, porque são geradas por máquina ao aceitar "allow".
+.claude/settings.json
+.claude/settings.local.json
 
+# Demais agentes de IA — nada deles é versionado.
+.agents/
+.codex/
+.openai/
+.cursor/
+/AGENTS.md
+/agents.md
+
+# Editores
 .vscode/*
 !.vscode/extensions.json
 .idea/
 
-coverage/
-playwright-report/
-test-results/
+# Logs e artefatos locais
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.tsbuildinfo
+
+.DS_Store
+Thumbs.db
